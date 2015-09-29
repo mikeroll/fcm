@@ -25,4 +25,4 @@ split d s = case dropWhile (==d) s of
 parse_csv   :: FilePath -> IO [[String]]
 parse_csv f = do
     contents <- readFile f
-    return [split ',' line | line <- lines $ dos2unix $ dropBom contents ]
+    return [split ',' line | line <- lines . dos2unix . dropBom $ contents ]
