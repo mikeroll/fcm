@@ -2,5 +2,10 @@ import InputUtils
 
 main :: IO ()
 main = do
-    parse_csv "input/butterfly.txt" >>= print
+    let opts = ParseCsvOpts { delimiter = ','
+                            , stripHeader = False
+                            , stripNumbering = False
+                            , stripClassLabel = True
+                            }
+    parse_csv "input/butterfly.txt" opts >>= print
 
