@@ -26,9 +26,15 @@ split d s = case dropWhile (==d) s of
 parse_csv   :: FilePath -> ParseCsvOpts -> IO [[String]]
 parse_csv f opts = do
     contents <- readFile f
-    let d = delimiter opts
-        rows = lines . dos2unix . dropBom $ contents 
-    return [split d line | line <- rows]
+    let rows' = lines . dos2unix . dropBom $ contents
+        rows = if stripHeader opts then tail rows' else rows'
+        d = delimiter opts
+        getRow = case (stripNumbering opts, stripClassLabel opts) of
+                   (True, True)   -> init . tail . split d 
+                   (True, False)  -> tail . split d
+                   (False, True)  -> init . split d
+                   (False, False) -> split d
+    return [getRow line | line <- rows]
 
 -- |Set of options for 'parse_csv'
 data ParseCsvOpts = ParseCsvOpts
