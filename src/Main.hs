@@ -7,5 +7,4 @@ main = do
                             , stripNumbering = False
                             , stripClassLabel = True
                             }
-    parse_csv "input/butterfly.txt" opts >>= print
-
+    parseCsv "input/butterfly.txt" opts >>= print
