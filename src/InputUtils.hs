@@ -4,6 +4,7 @@ module InputUtils
 , split
 , ParseCsvOpts(..)
 , parseCsv
+, parseCsvString
 ) where
 
 -- | 'dos2unix' removes those filthy \r's
@@ -25,16 +26,20 @@ split d s = case dropWhile (==d) s of
 -- | 'parseCsv' takes a file and reads its contents as csv
 parseCsv :: FilePath -> ParseCsvOpts -> IO [[String]]
 parseCsv f opts = do
-    contents <- readFile f
-    let rows' = lines . dos2unix . dropBom $ contents
-        rows = if stripHeader opts then tail rows' else rows'
-        d = delimiter opts
-        getRow = case (stripNumbering opts, stripClassLabel opts) of
-            (True, True)   -> init . tail . split d 
-            (True, False)  -> tail . split d
-            (False, True)  -> init . split d
-            (False, False) -> split d
-    return [getRow line | line <- rows]
+    s <- readFile f 
+    return (parseCsvString s opts)
+
+-- | 'parseCsvString' takes a string and reads its contents as csv
+parseCsvString :: String -> ParseCsvOpts -> [[String]]
+parseCsvString s opts = [getRow line | line <- rows]
+    where rows = if stripHeader opts then tail rows' else rows'
+                 where rows' = lines . dos2unix . dropBom $ s
+          getRow = case (stripNumbering opts, stripClassLabel opts) of
+              (True, True)   -> init . tail . split d 
+              (True, False)  -> tail . split d
+              (False, True)  -> init . split d
+              (False, False) -> split d
+            where d = delimiter opts
 
 -- | Set of options for 'parseCsv'
 data ParseCsvOpts = ParseCsvOpts
