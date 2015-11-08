@@ -35,11 +35,11 @@ parseCsvString s opts = [getRow line | line <- rows]
     where rows = if stripHeader opts then tail rows' else rows'
                  where rows' = lines . dos2unix . dropBom $ s
           getRow = case (stripNumbering opts, stripClassLabel opts) of
-              (True, True)   -> init . tail . split d 
-              (True, False)  -> tail . split d
-              (False, True)  -> init . split d
-              (False, False) -> split d
-            where d = delimiter opts
+                      (True, True)   -> init . tail . split d 
+                      (True, False)  -> tail . split d
+                      (False, True)  -> init . split d
+                      (False, False) -> split d
+                   where d = delimiter opts
 
 -- | Set of options for 'parseCsv'
 data ParseCsvOpts = ParseCsvOpts
