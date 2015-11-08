@@ -12,7 +12,9 @@ cabal-version:          >=1.10
 
 library
   build-depends:        base >=4.8 && <4.9
-  hs-source-dirs:       src/lib
+  hs-source-dirs:       library
+  exposed-modules:      FCM
+                      , InputUtils
   default-language:     Haskell2010
 
 executable fcm
@@ -20,7 +22,7 @@ executable fcm
   build-depends:        base >=4.8 && <4.9
                       , fcm
 
-  hs-source-dirs:       src/exec
+  hs-source-dirs:       executable
   default-language:     Haskell2010
 
 test-suite spec
@@ -30,5 +32,5 @@ test-suite spec
                       , hspec >= 1.3
                       , fcm
 
-  hs-source-dirs:       test
+  hs-source-dirs:       tests
   default-language:     Haskell2010
