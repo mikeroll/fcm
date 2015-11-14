@@ -13,12 +13,10 @@ spec = do
             it "returns string with no \r characters" $ do
                 dos2unix "teststring\r" `shouldBe` "teststring"
 
-
     describe "dropBom" $ do
         context "when no BOM present" $ do
             it "returns original string" $ do
                 dropBom "teststring" `shouldBe` "teststring"
-
         context "when BOM is present" $ do
             it "returns the string ignoring BOM" $ do
                 dropBom "\xfeffteststring" `shouldBe` "teststring"
