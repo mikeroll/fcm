@@ -31,15 +31,14 @@ initialMemberships clusters_n objects_n =
         replicate objects_n $ 1.0 / fromIntegral clusters_n
 
 -- | calculates new cluster centers
-nextCenters :: (Floating f) => [[f]] -> [[f]] -> [[f]]
-nextCenters memberships objects =
-    map nextCenter memberships
+nextCenters :: (Floating f) => [[f]] -> [[f]] -> f -> [[f]]
+nextCenters memberships objects m = map nextCenter memberships
   where
     nextCenter cluster =
         weighted_xs `divV` weights
       where
-        weighted_xs = sumV $ zipWith (\u x -> x `mulV` (u^1)) cluster objects
-        weights = sum $ map (^1) cluster
+        weighted_xs = sumV $ zipWith (\u x -> x `mulV` (u**m)) cluster objects
+        weights = sum $ map (**m) cluster
 
 -- | reflows memberships
 -- nextMemberships ::
