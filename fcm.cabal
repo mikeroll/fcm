@@ -21,7 +21,6 @@ executable fcm
   main-is:              Main.hs
   build-depends:        base >=4.8 && <4.9
                       , fcm
-
   hs-source-dirs:       executable
   default-language:     Haskell2010
 
@@ -31,6 +30,12 @@ test-suite spec
   build-depends:        base >=4.8 && <4.9
                       , hspec >= 1.3
                       , fcm
+  hs-source-dirs:       tests
+  default-language:     Haskell2010
 
+test-suite hlint
+  type:                 exitcode-stdio-1.0
+  main-is:              HLint.hs
+  build-depends:        base, hlint >= 1.8
   hs-source-dirs:       tests
   default-language:     Haskell2010

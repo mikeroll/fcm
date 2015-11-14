@@ -15,6 +15,7 @@ divV v x = map (/ x) v
 sumV :: (Floating e) => [[e]] -> [e]
 sumV = foldl1' (zipWith (+))
 
+
 -- | computes Hamming distance between two vectors
 hammingDistance :: (Floating x) => [x] -> [x] -> x
 hammingDistance x1 x2 = sum . map abs $ zipWith (-) x1 x2
@@ -27,7 +28,7 @@ euclidDistance x1 x2 = sqrt . sum $ zipWith (-) x1 x2
 initialMemberships :: (Floating f) => Int -> Int -> [[f]]
 initialMemberships clusters_n objects_n =
     replicate clusters_n $
-        replicate objects_n $ 1.0 / (fromIntegral clusters_n)
+        replicate objects_n $ 1.0 / fromIntegral clusters_n
 
 -- | calculates new cluster centers
 nextCenters :: (Floating f) => [[f]] -> [[f]] -> [[f]]
