@@ -2,7 +2,7 @@ module FCM
 ( initMemberships
 , nextCenters
 , nextMemberships
-, converges
+, converge
 , clusterize
 ) where
 
@@ -11,12 +11,16 @@ import System.Random
 
 import Math
 
+-- convenience aliases
+type Vector = [Double]
+type Matrix = [[Double]]
+
 -- | chunks a list into a matrix
 chunks :: (Floating f) => Int -> [f] -> [[f]]
 chunks n = takeWhile (not.null) . unfoldr (Just . splitAt n)
 
 -- | sets up random initial memberships
-initMemberships :: Int -> Int -> [[Double]]
+initMemberships :: Int -> Int -> Matrix
 initMemberships clusters_n objects_n =
     transpose . map normalize $ chunks clusters_n $
         take n $ randomRs randomRange $ mkStdGen randomSeed
@@ -27,7 +31,7 @@ initMemberships clusters_n objects_n =
         randomRange = (1, fromIntegral randomSeed)
 
 -- | calculates new cluster centers
-nextCenters :: (Floating f) => f -> [[f]] -> [[f]] -> [[f]]
+nextCenters :: Double -> Matrix -> [Vector] -> [Vector]
 nextCenters m memberships objects = map nextCenter memberships
   where
     nextCenter cluster = weighted_xs `divV` weights
@@ -36,7 +40,7 @@ nextCenters m memberships objects = map nextCenter memberships
         weights = sum $ map (**m) cluster
 
 -- | reflows memberships
-nextMemberships :: (Floating f) => ([f] -> [f] -> f) -> f -> [[f]] -> [[f]] -> [[f]]
+nextMemberships :: DistanceFunc -> Double -> [Vector] -> [Vector] -> Matrix
 nextMemberships df m objects centers = transpose $ map nextMembership objects
   where
     nextMembership object = map nextCoef centers
@@ -45,16 +49,19 @@ nextMemberships df m objects centers = transpose $ map nextMembership objects
           where
             term center' = (df object center / df object center') ** (2 / (m - 1))
 
--- | returns whether the iteration converges with error e
-converges :: (Ord f, Floating f) => [[f]] -> [[f]] -> f -> Bool
-converges a b e = absMaximumM (a `subM` b) < e
-
--- | main algorithm entry point
-clusterize :: (Ord f, Floating f) => ([f] -> [f] -> f) -> f -> f -> [[f]] -> [[f]] -> [[f]]
-clusterize df m e memberships objects
-    | converges memberships memberships' e = memberships'
-    | otherwise = clusterize df m e memberships' objects
+-- | converges memberships matrix to within given error
+converge :: DistanceFunc -> Double -> Double -> Matrix -> [Vector] -> Matrix
+converge df m e memberships objects
+    | absMaximumM (memberships' `subM` memberships) < e = memberships'
+    | otherwise = converge df m e memberships' objects
     where
       centers' = nextCenters m memberships objects
       memberships' = nextMemberships df m objects centers'
+
+-- | main algorithm entry point
+clusterize :: DistanceFunc -> Int -> Double -> Double -> [Vector] -> Matrix
+clusterize df clusters_n m e objects =
+    converge df m e initial objects
+      where
+        initial = initMemberships clusters_n $ length objects
 

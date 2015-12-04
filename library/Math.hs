@@ -4,6 +4,7 @@ module Math
 , sumV
 , subM
 , absMaximumM
+, DistanceFunc
 , hammingDistance
 , euclidDistance
 ) where
@@ -34,11 +35,12 @@ subM = zipWith subV
 absMaximumM :: (Num e, Ord e) => [[e]] -> e
 absMaximumM = maximum . map (\v -> maximum $ map abs v)
 
+type DistanceFunc = [Double] -> [Double] -> Double
 
 -- | computes Hamming distance between two vectors
-hammingDistance :: (Floating x) => [x] -> [x] -> x
+hammingDistance :: DistanceFunc
 hammingDistance x1 x2 = sum . map abs $ x1 `subV` x2
 
 -- | computes Euclid distance between two vectors
-euclidDistance :: (Floating x) => [x] -> [x] -> x
+euclidDistance :: DistanceFunc
 euclidDistance x1 x2 = sqrt . sum $ zipWith (\a b -> (a - b)**2) x1 x2
