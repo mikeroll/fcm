@@ -38,7 +38,7 @@ fcm_args = FCMArgs
                         [ Hamming &= help "Hamming distance (default)"
                         , Euclidean &= help "Euclidean distance"
                         ]
-    }
+    } &= program "fcm"
 
 main :: IO ()
 main = do
