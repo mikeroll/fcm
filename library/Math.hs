@@ -1,15 +1,19 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Math
 ( mulV
 , divV
 , sumV
 , subM
 , absMaximumM
+, Distance(..)
 , DistanceFunc
 , hammingDistance
 , euclidDistance
 ) where
 
 import Data.List
+import Data.Data
 
 -- | multilies a vector by a number
 mulV :: (Num e) => [e] -> e -> [e]
@@ -34,6 +38,9 @@ subM = zipWith subV
 -- | max absolute value in matrix
 absMaximumM :: (Num e, Ord e) => [[e]] -> e
 absMaximumM = maximum . map (\v -> maximum $ map abs v)
+
+data Distance = Hamming | Euclidean
+  deriving(Eq, Show, Read, Data)
 
 type DistanceFunc = [Double] -> [Double] -> Double
 

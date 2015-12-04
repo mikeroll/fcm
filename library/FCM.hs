@@ -1,5 +1,8 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module FCM
-( initMemberships
+( ClassifierOpts(..)
+, initMemberships
 , nextCenters
 , nextMemberships
 , converge
@@ -7,6 +10,8 @@ module FCM
 ) where
 
 import Data.List
+import Data.Data
+import Data.Typeable
 import System.Random
 
 import Math
@@ -14,6 +19,14 @@ import Math
 -- convenience aliases
 type Vector = [Double]
 type Matrix = [[Double]]
+
+-- | options supported by algorithm
+data ClassifierOpts = ClassifierOpts
+    { _clusters :: Int
+    , _fuzziness :: Double
+    , _threshold :: Double
+    , _distance :: Distance
+    } deriving (Show, Data, Typeable)
 
 -- | chunks a list into a matrix
 chunks :: (Floating f) => Int -> [f] -> [[f]]
@@ -49,7 +62,7 @@ nextMemberships df m objects centers = transpose $ map nextMembership objects
           where
             term center' = (df object center / df object center') ** (2 / (m - 1))
 
--- | converges memberships matrix to within given error
+-- | converges memberships matrix to within given threshold
 converge :: DistanceFunc -> Double -> Double -> Matrix -> [Vector] -> Matrix
 converge df m e memberships objects
     | absMaximumM (memberships' `subM` memberships) < e = memberships'
@@ -59,9 +72,14 @@ converge df m e memberships objects
       memberships' = nextMemberships df m objects centers'
 
 -- | main algorithm entry point
-clusterize :: DistanceFunc -> Int -> Double -> Double -> [Vector] -> Matrix
-clusterize df clusters_n m e objects =
+clusterize :: ClassifierOpts -> [Vector] -> Matrix
+clusterize opts objects =
     converge df m e initial objects
       where
-        initial = initMemberships clusters_n $ length objects
-
+        initial = initMemberships c $ length objects
+        c = _clusters  opts
+        m = _fuzziness opts
+        e = _threshold opts
+        df = case (_distance opts) of
+                Hamming   -> hammingDistance
+                Euclidean -> euclidDistance

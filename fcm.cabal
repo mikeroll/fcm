@@ -23,6 +23,7 @@ executable fcm
   main-is:              Main.hs
   build-depends:        base >=4.8 && <4.9
                       , fcm
+                      , cmdargs
   hs-source-dirs:       executable
   default-language:     Haskell2010
 

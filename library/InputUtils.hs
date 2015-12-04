@@ -1,11 +1,24 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module InputUtils
 ( dos2unix
 , dropBom
 , split
-, ParseCsvOpts(..)
+, InputOpts(..)
 , parseCsvString
 , loadObjects
 ) where
+
+import Data.Data
+import Data.Typeable
+
+-- | Set of options for 'parseCsv'
+data InputOpts = InputOpts
+    { _delimiter :: Char
+    , _stripHeader :: Bool
+    , _stripNumbering :: Bool
+    , _stripClassLabel :: Bool
+    } deriving (Show, Data, Typeable)
 
 -- | 'dos2unix' removes those filthy \r's
 dos2unix :: String -> String
@@ -24,27 +37,19 @@ split d s = case dropWhile (==d) s of
           where (w, s'') = break (==d) s'
 
 -- | 'parseCsvString' takes a string and reads its contents as csv
-parseCsvString :: String -> ParseCsvOpts -> [[String]]
+parseCsvString :: String -> InputOpts -> [[String]]
 parseCsvString s opts = [getRow line | line <- rows]
-    where rows = if stripHeader opts then tail rows' else rows'
+    where rows = if _stripHeader opts then tail rows' else rows'
                  where rows' = lines . dos2unix . dropBom $ s
-          getRow = case (stripNumbering opts, stripClassLabel opts) of
+          getRow = case (_stripNumbering opts, _stripClassLabel opts) of
                       (True, True)   -> init . tail . split d
                       (True, False)  -> tail . split d
                       (False, True)  -> init . split d
                       (False, False) -> split d
-                   where d = delimiter opts
-
--- | Set of options for 'parseCsv'
-data ParseCsvOpts = ParseCsvOpts
-    { delimiter :: Char
-    , stripHeader :: Bool
-    , stripNumbering :: Bool
-    , stripClassLabel :: Bool
-    }
+                   where d = _delimiter opts
 
 -- | Load features from file
-loadObjects :: FilePath -> ParseCsvOpts -> IO [[Double]]
+loadObjects :: FilePath -> InputOpts -> IO [[Double]]
 loadObjects f opts = do
     s <- readFile f
     let raw = parseCsvString s opts
