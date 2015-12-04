@@ -1,44 +1,60 @@
 module FCM
-( hammingDistance
-, euclidDistance
+( initMemberships
+, nextCenters
+, nextMemberships
+, converges
+, clusterize
 ) where
 
 import Data.List
+import System.Random
 
--- reinventing vectors
-mulV :: (Floating e) => [e] -> e -> [e]
-mulV v x = map (* x) v
+import Math
 
-divV :: (Floating e) => [e] -> e -> [e]
-divV v x = map (/ x) v
+-- | chunks a list into a matrix
+chunks :: (Floating f) => Int -> [f] -> [[f]]
+chunks n = takeWhile (not.null) . unfoldr (Just . splitAt n)
 
-sumV :: (Floating e) => [[e]] -> [e]
-sumV = foldl1' (zipWith (+))
-
-
--- | computes Hamming distance between two vectors
-hammingDistance :: (Floating x) => [x] -> [x] -> x
-hammingDistance x1 x2 = sum . map abs $ zipWith (-) x1 x2
-
--- | computes Euclid distance between two vectors
-euclidDistance :: (Floating x) => [x] -> [x] -> x
-euclidDistance x1 x2 = sqrt . sum $ zipWith (-) x1 x2
-
--- | sets up initial memberships (for now they are just 1/(number of clusters))
-initialMemberships :: (Floating f) => Int -> Int -> [[f]]
-initialMemberships clusters_n objects_n =
-    replicate clusters_n $
-        replicate objects_n $ 1.0 / fromIntegral clusters_n
+-- | sets up random initial memberships
+initMemberships :: Int -> Int -> [[Double]]
+initMemberships clusters_n objects_n =
+    transpose . map normalize $ chunks clusters_n $
+        take n $ randomRs randomRange $ mkStdGen randomSeed
+      where
+        n = clusters_n * objects_n
+        normalize m = m `divV` (sum m)
+        randomSeed = 256
+        randomRange = (1, fromIntegral randomSeed)
 
 -- | calculates new cluster centers
-nextCenters :: (Floating f) => [[f]] -> [[f]] -> f -> [[f]]
-nextCenters memberships objects m = map nextCenter memberships
+nextCenters :: (Floating f) => f -> [[f]] -> [[f]] -> [[f]]
+nextCenters m memberships objects = map nextCenter memberships
   where
-    nextCenter cluster =
-        weighted_xs `divV` weights
+    nextCenter cluster = weighted_xs `divV` weights
       where
         weighted_xs = sumV $ zipWith (\u x -> x `mulV` (u**m)) cluster objects
         weights = sum $ map (**m) cluster
 
 -- | reflows memberships
--- nextMemberships ::
+nextMemberships :: (Floating f) => ([f] -> [f] -> f) -> f -> [[f]] -> [[f]] -> [[f]]
+nextMemberships df m objects centers = transpose $ map nextMembership objects
+  where
+    nextMembership object = map nextCoef centers
+      where
+        nextCoef center = (1 /) . sum $ map term centers
+          where
+            term center' = (df object center / df object center') ** (2 / (m - 1))
+
+-- | returns whether the iteration converges with error e
+converges :: (Ord f, Floating f) => [[f]] -> [[f]] -> f -> Bool
+converges a b e = absMaximumM (a `subM` b) < e
+
+-- | main algorithm entry point
+clusterize :: (Ord f, Floating f) => ([f] -> [f] -> f) -> f -> f -> [[f]] -> [[f]] -> [[f]]
+clusterize df m e memberships objects
+    | converges memberships memberships' e = memberships'
+    | otherwise = clusterize df m e memberships' objects
+    where
+      centers' = nextCenters m memberships objects
+      memberships' = nextMemberships df m objects centers'
+

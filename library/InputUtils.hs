@@ -3,8 +3,8 @@ module InputUtils
 , dropBom
 , split
 , ParseCsvOpts(..)
-, parseCsv
 , parseCsvString
+, loadObjects
 ) where
 
 -- | 'dos2unix' removes those filthy \r's
@@ -22,12 +22,6 @@ split d s = case dropWhile (==d) s of
     "" -> []
     s' -> w : split d s''
           where (w, s'') = break (==d) s'
-
--- | 'parseCsv' takes a file and reads its contents as csv
-parseCsv :: FilePath -> ParseCsvOpts -> IO [[String]]
-parseCsv f opts = do
-    s <- readFile f
-    return (parseCsvString s opts)
 
 -- | 'parseCsvString' takes a string and reads its contents as csv
 parseCsvString :: String -> ParseCsvOpts -> [[String]]
@@ -48,3 +42,12 @@ data ParseCsvOpts = ParseCsvOpts
     , stripNumbering :: Bool
     , stripClassLabel :: Bool
     }
+
+-- | Load features from file
+loadObjects :: FilePath -> ParseCsvOpts -> IO [[Double]]
+loadObjects f opts = do
+    s <- readFile f
+    let raw = parseCsvString s opts
+    let toVector = map (read :: String -> Double)
+    let objects = map toVector raw
+    return objects
