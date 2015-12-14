@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module InputUtils
 ( dos2unix
 , dropBom
@@ -9,16 +7,13 @@ module InputUtils
 , loadObjects
 ) where
 
-import Data.Data
-import Data.Typeable
-
 -- | Set of options for 'parseCsv'
 data InputOpts = InputOpts
-    { _delimiter :: Char
+    { _delimiter :: String
     , _stripHeader :: Bool
     , _stripNumbering :: Bool
     , _stripClassLabel :: Bool
-    } deriving (Show, Data, Typeable)
+    }
 
 -- | 'dos2unix' removes those filthy \r's
 dos2unix :: String -> String
@@ -29,11 +24,12 @@ dropBom :: String -> String
 dropBom ('\xfeff':s) = s
 dropBom s = s
 
+-- TODO: support multichar delimiters
 -- | 'split' is like 'words', but splits on given delimiter, not just space
-split :: Char -> String -> [String]
-split d s = case dropWhile (==d) s of
+split :: String -> String -> [String]
+split ds@(d:_) s = case dropWhile (==d) s of
     "" -> []
-    s' -> w : split d s''
+    s' -> w : split ds s''
           where (w, s'') = break (==d) s'
 
 -- | 'parseCsvString' takes a string and reads its contents as csv

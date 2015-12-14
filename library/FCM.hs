@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module FCM
 ( ClassifierOpts(..)
 , initMemberships
@@ -10,8 +8,6 @@ module FCM
 ) where
 
 import Data.List
-import Data.Data
-import Data.Typeable
 import System.Random
 
 import Math
@@ -26,7 +22,7 @@ data ClassifierOpts = ClassifierOpts
     , _fuzziness :: Double
     , _threshold :: Double
     , _distance :: Distance
-    } deriving (Show, Data, Typeable)
+    }
 
 -- | chunks a list into a matrix
 chunks :: (Floating f) => Int -> [f] -> [[f]]

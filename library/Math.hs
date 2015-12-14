@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module Math
 ( mulV
 , divV
@@ -39,8 +37,7 @@ subM = zipWith subV
 absMaximumM :: (Num e, Ord e) => [[e]] -> e
 absMaximumM = maximum . map (\v -> maximum $ map abs v)
 
-data Distance = Hamming | Euclidean
-  deriving(Eq, Show, Read, Data)
+data Distance = Hamming | Euclidean deriving (Show, Read)
 
 type DistanceFunc = [Double] -> [Double] -> Double
 
