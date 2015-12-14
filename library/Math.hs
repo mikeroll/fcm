@@ -35,7 +35,7 @@ subM = zipWith subV
 
 -- | max absolute value in matrix
 absMaximumM :: (Num e, Ord e) => [[e]] -> e
-absMaximumM = maximum . map (\v -> maximum $ map abs v)
+absMaximumM = maximum . map (maximum . map abs)
 
 data Distance = Hamming | Euclidean deriving (Show, Read)
 

@@ -9,10 +9,10 @@ module InputUtils
 
 -- | Set of options for 'parseCsv'
 data InputOpts = InputOpts
-    { _delimiter :: String
-    , _stripHeader :: Bool
-    , _stripNumbering :: Bool
-    , _stripClassLabel :: Bool
+    { delimiter :: String
+    , stripHeader :: Bool
+    , stripNumbering :: Bool
+    , stripClassLabel :: Bool
     }
 
 -- | 'dos2unix' removes those filthy \r's
@@ -35,14 +35,14 @@ split ds@(d:_) s = case dropWhile (==d) s of
 -- | 'parseCsvString' takes a string and reads its contents as csv
 parseCsvString :: String -> InputOpts -> [[String]]
 parseCsvString s opts = [getRow line | line <- rows]
-    where rows = if _stripHeader opts then tail rows' else rows'
+    where rows = if stripHeader opts then tail rows' else rows'
                  where rows' = lines . dos2unix . dropBom $ s
-          getRow = case (_stripNumbering opts, _stripClassLabel opts) of
+          getRow = case (stripNumbering opts, stripClassLabel opts) of
                       (True, True)   -> init . tail . split d
                       (True, False)  -> tail . split d
                       (False, True)  -> init . split d
                       (False, False) -> split d
-                   where d = _delimiter opts
+                   where d = delimiter opts
 
 -- | Load features from file
 loadObjects :: FilePath -> InputOpts -> IO [[Double]]

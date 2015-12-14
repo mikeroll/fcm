@@ -18,10 +18,10 @@ type Matrix = [[Double]]
 
 -- | options supported by algorithm
 data ClassifierOpts = ClassifierOpts
-    { _clusters :: Int
-    , _fuzziness :: Double
-    , _threshold :: Double
-    , _distance :: Distance
+    { clusters :: Int
+    , fuzziness :: Double
+    , threshold :: Double
+    , distance :: Distance
     }
 
 -- | chunks a list into a matrix
@@ -35,7 +35,7 @@ initMemberships clusters_n objects_n =
         take n $ randomRs randomRange $ mkStdGen randomSeed
       where
         n = clusters_n * objects_n
-        normalize m = m `divV` (sum m)
+        normalize m = m `divV` sum m
         randomSeed = 256
         randomRange = (1, fromIntegral randomSeed)
 
@@ -73,9 +73,9 @@ clusterize opts objects =
     converge df m e initial objects
       where
         initial = initMemberships c $ length objects
-        c = _clusters  opts
-        m = _fuzziness opts
-        e = _threshold opts
-        df = case (_distance opts) of
+        c = clusters  opts
+        m = fuzziness opts
+        e = threshold opts
+        df = case distance opts of
                 Hamming   -> hammingDistance
                 Euclidean -> euclidDistance

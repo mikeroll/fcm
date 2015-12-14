@@ -1,20 +1,17 @@
 module Options
 ( Options(..)
-, fcm_opts
+, fcmOpts
 ) where
 
 import Options.Applicative
-import Options.Applicative.Types
 
 import InputUtils
 import FCM
 import Math
 
 
-
 data Options = Options
     { infile         :: FilePath
-
     , inputOpts      :: InputOpts
     , classifierOpts :: ClassifierOpts
     }
@@ -67,7 +64,7 @@ opts = Options
            <> showDefault
            <> help "Distance function to use, Hamming | Euclidean" )
 
-fcm_opts = info (helper <*> opts)
+fcmOpts = info (helper <*> opts)
            ( fullDesc
           <> progDesc "Classify objects from INFILE using FCM method"
           <> header "FCM clustering sample program" )

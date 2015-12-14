@@ -16,4 +16,4 @@ program (Options infile inputOpts classifierOpts) = do
     putStrLn $ unlines $ map show result
 
 main :: IO ()
-main = execParser fcm_opts >>= program
+main = execParser fcmOpts >>= program
