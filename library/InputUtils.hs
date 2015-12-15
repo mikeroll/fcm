@@ -34,9 +34,9 @@ split ds@(d:_) s = case dropWhile (==d) s of
 
 -- | 'parseCsvString' takes a string and reads its contents as csv
 parseCsvString :: String -> InputOpts -> [[String]]
-parseCsvString s opts = [getRow line | line <- rows]
-    where rows = if stripHeader opts then tail rows' else rows'
-                 where rows' = lines . dos2unix . dropBom $ s
+parseCsvString s opts = map getRow rows
+    where rows'  = lines . dos2unix . dropBom $ s
+          rows   = if stripHeader opts then tail rows' else rows'
           getRow = case (stripNumbering opts, stripClassLabel opts) of
                       (True, True)   -> init . tail . split d
                       (True, False)  -> tail . split d
