@@ -33,13 +33,14 @@ split ds@(d:_) s = case dropWhile (==d) s of
           where (w, s'') = break (==d) s'
 
 -- | 'parseCsvString' takes a string and reads its contents as csv
-parseCsvString :: String -> InputOpts -> [[String]]
-parseCsvString s opts = map getRow rows
-    where rows'  = lines . dos2unix . dropBom $ s
-          rows   = if stripHeader opts then tail rows' else rows'
-          getRow = case (stripNumbering opts, stripClassLabel opts) of
-                      (True, True)   -> init . tail . split d
-                      (True, False)  -> tail . split d
+parseCsvString :: InputOpts -> String -> [[String]]
+parseCsvString opts = map getRow . rows
+    where
+      rows   = if stripHeader opts then tail . rows' else rows'
+      rows'  = lines . dos2unix . dropBom
+      getRow = case (stripNumbering opts, stripClassLabel opts) of
+                      (True,  True)   -> init . tail . split d
+                      (True,  False)  -> tail . split d
                       (False, True)  -> init . split d
                       (False, False) -> split d
                    where d = delimiter opts
@@ -48,7 +49,7 @@ parseCsvString s opts = map getRow rows
 loadObjects :: FilePath -> InputOpts -> IO [[Double]]
 loadObjects f opts = do
     s <- readFile f
-    let raw = parseCsvString s opts
+    let raw = parseCsvString opts s
     let toVector = map (read :: String -> Double)
     let objects = map toVector raw
     return objects
